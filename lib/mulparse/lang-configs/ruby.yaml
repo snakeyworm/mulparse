@@ -1,0 +1,73 @@
+---
+- :name: module
+  :start: !ruby/regexp "/\n        (?<=\\s)module[\\t ]+ # Keyword\n        (?:\\\\\\n+\\s*)*
+    # White space and line continuation\n        (?<name>[A-Z]\\w*)(?=\\s) # Name\n
+    \   /x"
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: class
+  :start: !ruby/regexp "/\n        (?<=\\s)class[\\t ]+ # Keyword\n        (?:\\\\\\n+[\\t
+    ]*)* # White space and line continuation\n        (?<nesting_class>(?:[A-Z]\\w*::(?:\\\\\\n+[\\t
+    ]*)*)*) # White space and line continuation\n        (?<name>[A-Z]\\w*) # Name\n
+    \       (?:[\\t ]*(?:[\\t ]+\\\\\\n+\\s*)* # White space and line continuation\n
+    \       <? # Inheritance operator\n        [\\t ]*(?:[\\t ]+\\\\\\n+\\s*)* # White
+    space and line continuation\n        (?<parent>[A-Z]\\w*))?(?=\\s) # Parent class\n
+    \   /x"
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: singleton-class
+  :start: !ruby/regexp "/\n        (?<=\\s)class[\\t ]+ # Keyword\n        (?:\\\\\\n+[\\t
+    ]*)* # White space and line continuation\n        [\\t ]*\n        << # Singleton
+    operator\n        [\\t ]*(?:[\\t ]+\\\\\\n+\\s*)* # White space and line continuation\n
+    \       (?<name>\\w*)(?=\\s) # Name\n    /x"
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: method
+  :start: !ruby/regexp "/\n        (?<=\\s)def[\\t ]+ # Keyword\n        (?:\\\\\\n+[\\t
+    ]*)* # White space and line continuation\n        (?:(?<class>\\w+) # Class\n
+    \       (?:\\\\\\n+[\\t ]*)*[\\t ]* # White space and line continuation\n        \\.
+    # Dot operator\n        [\\t ]*(?:\\\\\\n+[\\t ]*)*)? # White space and line continuation\n
+    \       (?<name>\\w+)(?=[\\s\\(]*) # Name\n    /x"
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: access-modifier
+  :start: !ruby/regexp /(?<=\s)private|protected|public(?=\s)/
+- :name: case
+  :start: !ruby/regexp /(?<=\s)case(?=[\(\t ])/
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: if
+  :start: !ruby/regexp "/\n        (?<=[\\n;])[\\t ]* # White space\n        if #
+    Key word\n        (?:\\\\\\n+[\\t ]*)*[\\s\\(] # White space and line continuation\n
+    \   /x"
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: unless
+  :start: !ruby/regexp "/\n        (?<=[\\n;])[\\t ]* # White space\n        unless
+    # Key word\n        (?:\\\\\\n+[\\t ]*)*[\\s\\(] # White space and line continuation\n
+    \   /x"
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: do-block
+  :start: !ruby/regexp "/\n        [\\)\\s]+ # White space\n        do # Key word\n
+    \       (?:\\\\\\n+[\\t ]*)*[\\s\\|] # White space and line continuation\n    /x"
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: begin
+  :start: !ruby/regexp "/\n        ;?\\s+ # White space\n        begin # Key word\n
+    \       [(\\s] # White space\n    /x"
+  :finish: !ruby/regexp /(?<=\s)end(?=\s)/
+- :name: multi-comment
+  :start: !ruby/regexp /^=begin(?<content>\s.*?)(?<=\n)=end(?=\s)/m
+- :name: single-comment
+  :start: !ruby/regexp /#(?<content>.*?)(?=\n)/
+- :name: string
+  :start: !ruby/regexp /(?:%[q|Q]?(?<delimiter>"|'|[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\]\{\}\\\|\;\:\,\<\.\>\/\?]))|(?<delimiter>"|')/
+  :finish: "(?<escape>\\\\*)%{delimiter}"
+  :unestable: true
+  :hash: &1
+    "{": "}"
+    "<": ">"
+    "[": "]"
+    "/": "/"
+- :name: regular-expression
+  :start: !ruby/regexp /(?:%r(?<delimiter>"|'|[\`\~\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\]\{\}\\\|\;\:\,\<\.\>\/\?]))|(?<delimiter>\/)/
+  :finish: "(?<escape>\\\\*)%{delimiter}"
+  :unestable: true
+  :hash: *1
+- :name: here-document
+  :start: !ruby/regexp /[=\s]<<\-?(?<mode>['"`]?)(?<EOD>[A-Za-z_]\w*)\k<mode>/
+  :finish: "(?<escape>[\\\\]*)%{EOD}"
+  :unestable: true

@@ -1,0 +1,6 @@
+
+@foo-open-bar
+
+content
+
+@bar-close-foo
